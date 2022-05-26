@@ -1,10 +1,12 @@
 const mongoose     = require('mongoose');
 const mongoosastic = require('mongoosastic');
+const {getIndexName} = require("mongoosastic/dist/utils");
+
 // Connexion et nom de la bdd mongo
 mongoose.connect('mongodb://localhost:27017/archeo');
 
 // Création d'un nouveau schema
-var UserSchema = new mongoose.Schema({
+var SiteSchema = new mongoose.Schema({
     id: Number,
     Lambert_X: String,
     Lambert_Y: String,
@@ -20,21 +22,27 @@ var UserSchema = new mongoose.Schema({
 
 });
 
-// Connexion à elasticSearch
-UserSchema.plugin(mongoosastic, {
+
+// enregistrement d'un plugin pour le schema "SiteSchema"
+SiteSchema.plugin(mongoosastic, {
     "host": "localhost",
     "port": 9200
 });
+// Ajout du plugin au modèle, pour indexer le modèle dans elasticsearch
+//Par défaut, le plugin utilisera la pluralisation du nom du modèle ('sites_archeos') comme nom d'index et le nom du modèle ('sites_archeos') comme type dans elasticsearch.
+var Site = mongoose.model('sites_archeo', SiteSchema);
 
-// nom de l'index elasticSearch
-var User = mongoose.model('sites_archeo', UserSchema);
 
-User.createMapping((err, mapping) => {
+// Création du mappage pour l'index
+ Site.createMapping((err, mapping) => {
     console.log('cartographie créée');
-});
+ });
 
-var newUser = new User({
-    id: 801,
+
+
+// données à insérer dans les deux bases
+var newSite = new Site({
+    id: 804,
     Lambert_X: "831470",
     Lambert_Y: "6881060",
     Region: "Egypte",
@@ -50,28 +58,30 @@ var newUser = new User({
 
 });
 
-newUser.save((err) => {
+// Enregistrement dans mongoDB
+newSite.save((err) => {
     if(err) {
         console.log(err);
     }
-    console.log('Le site archeologique a bien été ajouté aux deux bases');
+    console.log('Le site archeologique a bien été ajouté dans archeo (mongoDB)');
 })
 
-newUser.on('es-indexed', (err, result) => {
+// Indexation dans elasticSearch
+newSite.on('es-indexed', (err, result) => {
     console.log('indexé à elasticSearch');
 });
 
 
 
 
-
-async function recupUser(){
-    const users =  await User.find({});
-    // console.log(users[0]);
-    users.forEach(item =>
+// Affiche la liste des sites enregistrées dans la bdd archeo (mongoDB)
+async function recupSite(){
+    const sites =  await Site.find({});
+    // console.log(sites[0]);
+    sites.forEach(item =>
 
         console.log(item)
     );
 }
 
-recupUser();
+recupSite();
