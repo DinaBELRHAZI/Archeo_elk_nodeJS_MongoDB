@@ -23,8 +23,8 @@ Pour cela, mongoose et mongoosastic sont utilisés.
 Maintenant, vous pouvez aller vérifier l'insertion de votre site archéologique.
 
 - Base de données archeo (Collection sites_archeos)
-![bdd](img/bdd-archeo.png)
+![bdd](img/archeo-bdd.png)
 
 
 - Index (sites_archeos)  
-  ![index](img/index.png)
+  ![index](img/index-elk.png)
